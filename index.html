@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spotify-like Mobile Player</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* Body uses column flex to stack items vertically */
+    body {
+      background: linear-gradient(180deg, #4c6670 0%, #2b2e34 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    
+    /* PLAYER CONTAINER */
+    .player-container {
+      width: 488px; /* 375px * 1.3 */
+      max-width: 90vw;
+      padding: 21px; /* 16px * 1.3 */
+      position: relative;
+      margin-bottom: 21px; /* 16px * 1.3 */
+    }
+    
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 21px; /* 16px * 1.3 */
+      opacity: 0.8;
+    }
+    .top-bar span {
+      margin: 0 10px; /* 8px * 1.3 */
+      font-size: 18px; /* 14px * 1.3 */
+    }
+    
+    /* Main Content */
+    .album-art {
+      width: 100%;
+      border-radius: 10px; /* 8px * 1.3 */
+      object-fit: cover;
+      margin-bottom: 31px; /* 24px * 1.3 */
+    }
+    .song-details {
+      text-align: center;
+      margin-bottom: 21px; /* 16px * 1.3 */
+    }
+    .scrolling-container {
+      width: 100%;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    }
+    .scrolling-text {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: scrollText 10s linear infinite;
+      font-size: 31px; /* 24px * 1.3 */
+      font-weight: bold;
+    }
+    .scrolling-text span {
+      padding-right: 65px; /* 50px * 1.3 */
+    }
+    @keyframes scrollText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .song-details h2 {
+      font-size: 21px; /* 16px * 1.3 */
+      font-weight: 400;
+      color: #B3B3B3;
+      margin-top: 10px; /* 8px * 1.3 */
+    }
+    
+    /* Progress Bar & Time */
+    .progress-container {
+      display: flex;
+      align-items: center;
+      margin: 21px 0; /* 16px * 1.3 */
+    }
+    .time {
+      font-size: 16px; /* 12px * 1.3 */
+      color: #B3B3B3;
+      width: 52px; /* 40px * 1.3 */
+      text-align: center;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 5px; /* 4px * 1.3 */
+      background-color: #404040;
+      margin: 0 10px; /* 8px * 1.3 */
+      border-radius: 3px; /* 2px * 1.3 */
+      position: relative;
+      overflow: hidden;
+    }
+    .progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background-color: #1DB954;
+    }
+    
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      margin-top: 21px; /* 16px * 1.3 */
+    }
+    .control-btn {
+      background: none;
+      border: none;
+      color: #FFFFFF;
+      font-size: 23px; /* 18px * 1.3 */
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .play-btn {
+      width: 73px; /* 56px * 1.3 */
+      height: 73px; /* 56px * 1.3 */
+      background-color: #FFFFFF;
+      color: #2B2E34;
+      border-radius: 50%;
+      font-size: 31px; /* 24px * 1.3 */
+      margin: 0 21px; /* 16px * 1.3 */
+    }
+    /* Skip buttons margin reduced */
+    .skip-left-btn, .skip-right-btn {
+      margin: 0 10px;
+    }
+    .lyrics-btn, .add-btn {
+      font-size: 21px; /* 16px * 1.3 */
+      opacity: 0.9;
+    }
+    
+    /* LYRICS IMAGE CONTAINER */
+    .lyrics-image-container {
+      width: 488px; /* 375px * 1.3 */
+      max-width: 90vw;
+      margin: 0 auto;
+    }
+    .lyrics-image-container img {
+      display: block;
+      width: 100%;
+      max-width: 488px;
+      height: auto;
+    }
+    
+    /* ARTIST IMAGE CONTAINER */
+    .artist-image-container {
+      width: 488px; /* 375px * 1.3 */
+      max-width: 90vw;
+      margin: 5px auto 0 auto; /* Reduced top margin */
+    }
+    .artist-image-container img {
+      display: block;
+      width: 100%;
+      max-width: 488px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- PLAYER CONTAINER -->
+  <div class="player-container">
+    <div class="top-bar">
+      <span>7:50</span>
+      <span>The Beatles</span>
+      <span>100%</span>
+    </div>
+    <img src="barron.jpg" alt="Album Art" class="album-art">
+    <div class="song-details">
+      <div class="scrolling-container">
+        <div class="scrolling-text">
+          <span>Here Comes The Son - Remastered</span>
+          <span>Here Comes The Son - Remastered</span>
+        </div>
+      </div>
+      <h2>The Beatles</h2>
+    </div>
+    <div class="progress-container">
+      <div class="time current-time">0:00</div>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+      <div class="time total-time">0:00</div>
+    </div>
+    <div class="controls">
+      <!-- Existing Shuffle Button -->
+      <button class="control-btn lyrics-btn">
+        <img src="shuffle.png" alt="Shuffle" style="width:30px; height:30px;">
+      </button>
+      <!-- New Skip Left Button -->
+      <button class="control-btn skip-left-btn" id="skipLeftBtn">
+        <img src="skipleft.png" alt="Skip Left" style="width:42px; height:42px;">
+      </button>
+      <!-- Play/Pause Button -->
+      <button class="control-btn play-btn" id="playBtn">▶</button>
+      <!-- New Skip Right Button -->
+      <button class="control-btn skip-right-btn" id="skipRightBtn">
+        <img src="skipright.png" alt="Skip Right" style="width:42px; height:42px;">
+      </button>
+      <!-- Existing Plus Button -->
+      <button class="control-btn add-btn">
+        <img src="plus.png" alt="Plus" style="width:30px; height:30px;">
+      </button>
+    </div>
+    <!-- Audio Element: Autoplay on load -->
+    <audio id="audioElement" src="track.mp3" preload="auto" autoplay></audio>
+  </div>
+  
+  <!-- LYRICS IMAGE (Below the Player) -->
+  <div class="lyrics-image-container">
+    <img src="Lyrics.png" alt="Lyrics">
+  </div>
+  
+  <!-- ARTIST IMAGE (Below the Lyrics Image) -->
+  <div class="artist-image-container">
+    <img src="artist.png" alt="Artist">
+  </div>
+  
+  <script>
+    // Get references to the audio element and controls
+    const audioElement = document.getElementById('audioElement');
+    const playBtn = document.getElementById('playBtn');
+    const skipLeftBtn = document.getElementById('skipLeftBtn');
+    const skipRightBtn = document.getElementById('skipRightBtn');
+    const progressBar = document.querySelector('.progress');
+    const currentTimeEl = document.querySelector('.current-time');
+    const totalTimeEl = document.querySelector('.total-time');
+    
+    // Format time in M:SS format
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s < 10 ? '0' + s : s}`;
+    }
+    
+    // Toggle play/pause when play button is clicked
+    playBtn.addEventListener('click', function() {
+      if (audioElement.paused) {
+        audioElement.play().then(() => {
+          playBtn.innerHTML = '❚❚';
+        }).catch(error => {
+          console.error('Error playing audio:', error);
+        });
+      } else {
+        audioElement.pause();
+        playBtn.innerHTML = '▶';
+      }
+    });
+    
+    // Skip backward 10 seconds when skip left is clicked
+    skipLeftBtn.addEventListener('click', function() {
+      audioElement.currentTime = Math.max(0, audioElement.currentTime - 10);
+    });
+    
+    // Skip forward 10 seconds when skip right is clicked
+    skipRightBtn.addEventListener('click', function() {
+      if (audioElement.duration) {
+        audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 10);
+      }
+    });
+    
+    // Update progress bar and time as the audio plays
+    audioElement.addEventListener('timeupdate', function() {
+      if (audioElement.duration) {
+        const percentage = (audioElement.currentTime / audioElement.duration) * 100;
+        progressBar.style.width = percentage + '%';
+        currentTimeEl.textContent = formatTime(audioElement.currentTime);
+        totalTimeEl.textContent = formatTime(audioElement.duration);
+      }
+    });
+    
+    // Reset play button when audio ends
+    audioElement.addEventListener('ended', function() {
+      playBtn.innerHTML = '▶';
+    });
+    
+    // Ensure audio starts playing as soon as the website is loaded
+    window.addEventListener('load', function() {
+      audioElement.play().then(() => {
+        playBtn.innerHTML = '❚❚';
+      }).catch(error => {
+        console.error('Error auto-playing audio:', error);
+        // Since autoplay didn't work, leave the play button as "▶"
+        playBtn.innerHTML = '▶';
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
+
