@@ -228,8 +228,8 @@
   
   <!-- LYRICS IMAGE (Below the Player) -->
   <div class="lyrics-image-container">
-    <!-- IMPORTANT: Ensure that the file name is exactly "Lyrics.png" with correct case -->
-    <img src="Lyrics.png" alt="Lyrics">
+    <!-- IMPORTANT: Ensure that the file name is exactly "lyrics.jpg" with correct case -->
+    <img src="lyrics.jpg" alt="Lyrics">
   </div>
   
   <!-- ARTIST IMAGE (Below the Lyrics Image) -->
@@ -295,9 +295,15 @@
       playBtn.innerHTML = '▶';
     });
     
-    // Since autoplay may be blocked, we display the play symbol on load.
+    // Ensure audio starts playing as soon as the website is loaded
     window.addEventListener('load', function() {
-      playBtn.innerHTML = '▶';
+      audioElement.play().then(() => {
+        playBtn.innerHTML = '❚❚';
+      }).catch(error => {
+        console.error('Error auto-playing audio:', error);
+        // If auto-play is blocked, leave the play button as "▶"
+        playBtn.innerHTML = '▶';
+      });
     });
   </script>
 </body>
